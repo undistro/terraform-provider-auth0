@@ -19,7 +19,7 @@ var expandConnectionOptionsMap = map[string]expandConnectionOptionsFunc{
 
 	// Social Connections.
 	management.ConnectionStrategyGoogleOAuth2:        expandConnectionOptionsGoogleOAuth2,
-	management.ConnectionStrategyOAuth2:              expandConnectionOptionsOAuth2,
+	management.ConnectionStrategyOAuth2:              expandConnectionOptionsAuth0OAuth2,
 	management.ConnectionStrategyDropbox:             expandConnectionOptionsOAuth2,
 	management.ConnectionStrategyBitBucket:           expandConnectionOptionsOAuth2,
 	management.ConnectionStrategyPaypal:              expandConnectionOptionsOAuth2,
@@ -488,6 +488,29 @@ func expandConnectionOptionsGoogleApps(data *schema.ResourceData, config cty.Val
 	options.SetUserAttributes = value.String(config.GetAttr("set_user_root_attributes"))
 	if options.GetSetUserAttributes() == "on_each_login" {
 		options.SetUserAttributes = nil // This needs to be omitted to have the toggle enabled in the UI.
+	}
+
+	expandConnectionOptionsScopes(data, options)
+
+	var err error
+	options.UpstreamParams, err = value.MapFromJSON(config.GetAttr("upstream_params"))
+
+	return options, diag.FromErr(err)
+}
+
+func expandConnectionOptionsAuth0OAuth2(data *schema.ResourceData, config cty.Value) (interface{}, diag.Diagnostics) {
+	options := &management.ConnectionOptionsAuth0OAuth2{
+		ClientID:           value.String(config.GetAttr("client_id")),
+		ClientSecret:       value.String(config.GetAttr("client_secret")),
+		AuthorizationURL:   value.String(config.GetAttr("authorization_endpoint")),
+		TokenURL:           value.String(config.GetAttr("token_endpoint")),
+		SetUserAttributes:  value.String(config.GetAttr("set_user_root_attributes")),
+		NonPersistentAttrs: value.Strings(config.GetAttr("non_persistent_attrs")),
+		LogoURL:            value.String(config.GetAttr("icon_url")),
+		PKCEEnabled:        value.Bool(config.GetAttr("pkce_enabled")),
+		Scripts:            value.MapOfStrings(config.GetAttr("scripts")),
+		StrategyVersion:    value.Int(config.GetAttr("strategy_version")),
+		ScopesUseSpace:     value.Bool(config.GetAttr("scopes_use_space")),
 	}
 
 	expandConnectionOptionsScopes(data, options)

@@ -581,6 +581,11 @@ var optionsSchema = &schema.Schema{
 					"under the \"Attributes\" and \"Extended Attributes\" sections. Some examples: " +
 					"`basic_profile`, `ext_profile`, `ext_nested_groups`, etc.",
 			},
+			"scopes_use_space": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Specifies whether the scopes should be separated by a space or comma when authorizing access.",
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Optional: true,

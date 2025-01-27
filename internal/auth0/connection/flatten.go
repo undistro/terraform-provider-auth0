@@ -20,7 +20,7 @@ var flattenConnectionOptionsMap = map[string]flattenConnectionOptionsFunc{
 
 	// Social Connections.
 	management.ConnectionStrategyGoogleOAuth2:        flattenConnectionOptionsGoogleOAuth2,
-	management.ConnectionStrategyOAuth2:              flattenConnectionOptionsOAuth2,
+	management.ConnectionStrategyOAuth2:              flattenConnectionOptionsAuth0OAuth2,
 	management.ConnectionStrategyDropbox:             flattenConnectionOptionsOAuth2,
 	management.ConnectionStrategyBitBucket:           flattenConnectionOptionsOAuth2,
 	management.ConnectionStrategyPaypal:              flattenConnectionOptionsOAuth2,
@@ -454,6 +454,39 @@ func flattenConnectionOptionsOAuth2(
 		"pkce_enabled":             options.GetPKCEEnabled(),
 		"strategy_version":         options.GetStrategyVersion(),
 		"upstream_params":          upstreamParams,
+	}
+
+	return optionsMap, nil
+}
+
+func flattenConnectionOptionsAuth0OAuth2(
+	_ *schema.ResourceData,
+	rawOptions interface{},
+) (interface{}, diag.Diagnostics) {
+	options, ok := rawOptions.(*management.ConnectionOptionsAuth0OAuth2)
+	if !ok {
+		return nil, diag.FromErr(errUnsupportedConnectionOptionsType)
+	}
+
+	upstreamParams, err := structure.FlattenJsonToString(options.UpstreamParams)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
+	optionsMap := map[string]interface{}{
+		"client_id":                options.GetClientID(),
+		"client_secret":            options.GetClientSecret(),
+		"scopes":                   options.Scopes(),
+		"token_endpoint":           options.GetTokenURL(),
+		"authorization_endpoint":   options.GetAuthorizationURL(),
+		"scripts":                  options.GetScripts(),
+		"set_user_root_attributes": options.GetSetUserAttributes(),
+		"non_persistent_attrs":     options.GetNonPersistentAttrs(),
+		"icon_url":                 options.GetLogoURL(),
+		"pkce_enabled":             options.GetPKCEEnabled(),
+		"strategy_version":         options.GetStrategyVersion(),
+		"upstream_params":          upstreamParams,
+		"scopes_use_space":         options.GetScopesUseSpace(),
 	}
 
 	return optionsMap, nil
